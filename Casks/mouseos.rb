@@ -5,9 +5,13 @@
 #
 #   brew install --cask jjjyjyjyjj/tap/mouseos
 #
-# Homebrew strips the quarantine flag on install, which is what makes an
-# unsigned app launch without the Gatekeeper warning. That's the whole reason
-# to bother with a tap rather than just linking the .dmg.
+# Homebrew QUARANTINES casks by default -- it does not clear the flag. Since
+# this app isn't notarised, macOS would refuse to open it, so the postflight
+# below clears the flag Homebrew just set. That's what makes `brew install`
+# a single step instead of an install followed by a terminal incantation.
+#
+# Anyone who would rather make that call themselves can skip the tap and use
+# `--no-quarantine`, or clear the flag by hand afterwards.
 #
 # On each release, bump `version` and replace `sha256` with the output of:
 #   shasum -a 256 release/MouseOS-<version>-universal.dmg
@@ -21,6 +25,14 @@ cask "mouseos" do
   homepage "https://github.com/jjjyjyjyjj/mouseos"
 
   app "MouseOS.app"
+
+  postflight do
+    # Not notarised, and Homebrew quarantines casks by default, so without
+    # this macOS refuses to open what it just installed.
+    system_command "/usr/bin/xattr",
+                   args: ["-dr", "com.apple.quarantine", "#{appdir}/MouseOS.app"],
+                   sudo: false
+  end
 
   zap trash: [
     "~/Library/Application Support/mouseos",

@@ -26,12 +26,14 @@ cask "mouseos" do
 
   app "MouseOS.app"
 
-  postflight do
+  postflight_steps do
     # Not notarised, and Homebrew quarantines casks by default, so without
     # this macOS refuses to open what it just installed.
-    system_command "/usr/bin/xattr",
-                   args: ["-dr", "com.apple.quarantine", "#{appdir}/MouseOS.app"],
-                   sudo: false
+    #
+    # `run`, not `system_command`, and `{{appdir}}` rather than a bare appdir:
+    # postflight_steps is a declarative DSL with no Ruby methods in scope, and
+    # the token is expanded at install time, so a custom --appdir still works.
+    run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{appdir}}/MouseOS.app"]
   end
 
   zap trash: [

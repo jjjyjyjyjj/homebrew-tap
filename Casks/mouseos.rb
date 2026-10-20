@@ -26,7 +26,7 @@ cask "mouseos" do
 
   app "MouseOS.app"
 
-  postflight do
+  postflight_steps do
     # Not notarised, and Homebrew quarantines casks by default, so without
     # this macOS refuses to open what it just installed.
     system_command "/usr/bin/xattr",
